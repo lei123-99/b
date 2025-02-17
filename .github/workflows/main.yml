@@ -1,4 +1,4 @@
-name: zb
+name: itvlist
 
 on:
   schedule:
@@ -23,8 +23,8 @@ jobs:
       - name: Install dependencies
         run: pip install selenium requests futures eventlet
 
-      - name: Run IPJD1
-        run: python ${{ github.workspace }}/ipjd1.py
+      - name: Run itvlist
+        run: python ${{ github.workspace }}/new.py
 
       - name: 提交更改
         run: |
