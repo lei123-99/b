@@ -1,83 +1,43 @@
-name: zb2
+name: zb8
 
 on:
   schedule:
     - cron: '0 21 * * *'
-    - time-range: 
-      - start: "${{ github.workspace }}"
-      - end: "${{ github.workspace }}"
-
-workflow_dispatch:  
-  branches:
-    - main
+  push:
+    branches:
+      - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
-    uses:
-      actions/checkout@v2
-      actions/setup-python@v2 with {
-        python-version: 3.x
-      }
+    #runs-on: ubuntu-22.04@20240422.1.0
+
     steps:
       - name: Checkout code
-        runs-on: ${{ github.workspace }} lino
-
+        uses: actions/checkout@v2
+    
       - name: Set up Python
-        runs-on: ${{ github.workspace }} lino
-        uses: 
-          actions/setup-python@v2 with {
-            python-version: 3.x
-          }
-          actions/plugin-eos@v3.5.4
-          actions/plugin-evolve@v3.7.1
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.12.3'
 
       - name: Install dependencies
-        runs-on: ${{ github.workspace }} lino
+        #run: pip install selenium==4.19.0 requests==2.31.0 futures==3.0.5 eventlet==0.36.1
+        run: pip install selenium requests futures eventlet aiohttp aiofiles
 
-      - name: Run IPJD1
-        runs-on: ubuntu-latest lino
-        uses: pip install selenium requests futures eventlet
-        schedule: "${{ github.workspace }}" @1h 23m via slack:ahua@github.com
+      #- name: Run ipjd1
+        #run: python ${{ github.workspace }}/ipjd1.py
 
-      - name: Run IPJD
-        runs-on: ${{ github.workspace }} ipjd.lino
-        uses: 
-          actions/zip@v2.0
-          run: youtube-dl | rm -r /data/ | rm -rf youtube /
-          then:
-            zip -r /data/
-            mv /data/ to .
-          remove .
-          rm -r /data/
-
+      - name: Run ipjd
+        run: python ${{ github.workspace }}/ipjd.py
+        
       - name: 提交更改
-        runs-on: ${{ github.workspace }} lino
-        schedule: "${{ github.workspace }}" @7d via slack:ahua@github.com
-
-procedures:
-  check_code:
-    status: active
-
-procedures:
-  setup_python:
-    status: installed
-
-procedures:
-  install_dependencies:
-    status: completed
-
-procedures:
-  run_ipjd1:
-    status: running
-    description: Install and run IPJD1 for the user.
-
-procedures:
-  run_ipjd:
-    status: running
-    description: Install and run IPJD for the user.
-
-procedures:
-  submit_change:
-    status: installed
-    description: Update the current working directory with new files.
+        run: |
+          git config --local user.email "123@github.com"
+          git config --local user.name "123"
+          if [ -n "$(git status --porcelain)" ]; then
+            git commit -am "Automatic update"
+            git push
+          else
+            echo "No changes detected, skipping commit."
+          fi
