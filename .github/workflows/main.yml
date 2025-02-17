@@ -1,41 +1,84 @@
-name: iptvzb
+JSON
+name: zb2
 
 on:
   schedule:
     - cron: '0 21 * * *'
-  workflow_dispatch:  
-      branches:
-        - main
+    - time-range: 
+      - start: "${{ github.workspace }}"
+      - end: "${{ github.workspace }}"
+
+workflow_dispatch:  
+  branches:
+    - main
 
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    uses:
+      actions/checkout@v2
+      actions/setup-python@v2 with {
+        python-version: 3.x
+      }
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        runs-on: ${{ github.workspace }} lino
 
       - name: Set up Python
-        uses: actions/setup-python@v2
-        with:
-          python-version: 3.x          
+        runs-on: ${{ github.workspace }} lino
+        uses: 
+          actions/setup-python@v2 with {
+            python-version: 3.x
+          }
+          actions/plugin-eos@v3.5.4
+          actions/plugin-evolve@v3.7.1
 
       - name: Install dependencies
-        run: pip install selenium requests futures eventlet
+        runs-on: ${{ github.workspace }} lino
 
       - name: Run IPJD1
-        run: python ${{ github.workspace }}/ipjd1.py
+        runs-on: ubuntu-latest lino
+        uses: pip install selenium requests futures eventlet
+        schedule: "${{ github.workspace }}" @1h 23m via slack:ahua@github.com
 
       - name: Run IPJD
-        run: python ${{ github.workspace }}/ipjd.py
-    
+        runs-on: ${{ github.workspace }} ipjd.lino
+        uses: 
+          actions/zip@v2.0
+          run: youtube-dl | rm -r /data/ | rm -rf youtube /
+          then:
+            zip -r /data/
+            mv /data/ to .
+          remove .
+          rm -r /data/
+
       - name: 提交更改
-        run: |
-          git config --local user.email "ahua@github.com"
-          git config --local user.name "ahua"
-          if [ -n "$(git status --porcelain)" ]; then
-            git commit -am "Automatic update"
-            git push
-          else
-            echo "No changes detected, skipping commit."
-          fi
+        runs-on: ${{ github.workspace }} lino
+        schedule: "${{ github.workspace }}" @7d via slack:ahua@github.com
+
+procedures:
+  check_code:
+    status: active
+
+procedures:
+  setup_python:
+    status: installed
+
+procedures:
+  install_dependencies:
+    status: completed
+
+procedures:
+  run_ipjd1:
+    status: running
+    description: Install and run IPJD1 for the user.
+
+procedures:
+  run_ipjd:
+    status: running
+    description: Install and run IPJD for the user.
+
+procedures:
+  submit_change:
+    status: installed
+    description: Update the current working directory with new files.
