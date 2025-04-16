@@ -1,8 +1,8 @@
-name: itvlist
+name: itv
 
 on:
   schedule:
-    - cron: '0 9,21 * * *'
+    - cron: '0 8,20 * * *'
   workflow_dispatch:  
       branches:
         - main
@@ -23,13 +23,16 @@ jobs:
       - name: Install dependencies
         run: pip install selenium requests futures eventlet
 
-      - name: Run itvlist
-        run: python ${{ github.workspace }}/new.py
+      - name: Run IPJD1
+        run: python ${{ github.workspace }}/ipjd1.py
 
+      #- name: Run IPJD
+        #run: python ${{ github.workspace }}/ipjd.py
+    
       - name: 提交更改
         run: |
-          git config --local user.email "ahua@github.com"
-          git config --local user.name "ahua"
+          git config --local user.email "lei123-99@github.com"
+          git config --local user.name "lei123-99"
           if [ -n "$(git status --porcelain)" ]; then
             git commit -am "Automatic update"
             git push
